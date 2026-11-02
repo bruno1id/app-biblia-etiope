@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Bíblia Etíope — App</title>
+<meta name="theme-color" content="#4a1219">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="img/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bíblia Etíope">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --creme:#f3e9d6;--papel:#faf4e8;--vinho:#4a1219;--vinho2:#5c1a22;--tinta:#2a1410;--texto:#3b2a22;
+  --ouro:#b8893a;--ouro2:#d9b56a;--linha:rgba(184,137,58,.35);--card:#fffaf0;
+  --top:env(safe-area-inset-top);--bot:env(safe-area-inset-bottom);
+}
+body.noite{--creme:#17100e;--papel:#1f1613;--tinta:#f3e6cf;--texto:#d9c9b0;--card:#251a16;--linha:rgba(217,181,106,.25)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:'Montserrat',sans-serif;background:var(--creme);color:var(--texto);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;overscroll-behavior-y:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:inherit}
+
+/* ---------- Telas ---------- */
+.tela{display:none;min-height:100%;padding-bottom:calc(84px + var(--bot))}
+.tela.ativa{display:block}
+
+/* ---------- Cabeçalho ---------- */
+.head{position:sticky;top:0;z-index:20;background:var(--vinho);color:#f6e7c8;padding:calc(14px + var(--top)) 18px 14px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+.head h1{font-size:17px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.head .ic{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--ouro2)}
+.head .ic:active{background:rgba(255,255,255,.1)}
+.ic svg{width:22px;height:22px}
+
+/* ---------- Início ---------- */
+.hero{position:relative;height:calc(300px + var(--top));background:#2b0c10 url(img/capa.jpg) center 35%/cover;color:#fff;display:flex;flex-direction:column;justify-content:flex-end;padding:20px 20px 26px}
+.hero::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,6,8,.15) 0%,rgba(20,6,8,.2) 40%,rgba(30,8,12,.92) 100%)}
+.hero>*{position:relative}
+.hero small{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--ouro2);font-weight:600}
+.hero h2{font-size:30px;font-weight:800;line-height:1.08;margin-top:6px;letter-spacing:-.5px}
+.hero p{font-size:13.5px;opacity:.85;margin-top:6px}
+.wrap{padding:0 18px}
+.continuar{margin:-18px 18px 0;position:relative;z-index:2;background:var(--card);border:1px solid var(--linha);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px;box-shadow:0 10px 24px -14px rgba(0,0,0,.45);width:calc(100% - 36px);text-align:left}
+.continuar .b{width:44px;height:44px;border-radius:12px;background:var(--vinho);color:var(--ouro2);display:flex;align-items:center;justify-content:center;flex:none}
+.continuar small{display:block;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ouro);font-weight:600}
+.continuar b{font-size:16px;color:var(--tinta)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0 6px}
+.stat{background:var(--card);border:1px solid var(--linha);border-radius:14px;padding:12px 8px;text-align:center}
+.stat b{display:block;font-size:22px;font-weight:800;color:var(--vinho)}
+body.noite .stat b{color:var(--ouro2)}
+.stat span{font-size:11px;color:var(--texto);opacity:.8}
+.titulo-sec{display:flex;align-items:center;gap:10px;margin:26px 0 12px;font-size:11.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--ouro);font-weight:700}
+.titulo-sec::after{content:"";flex:1;height:1px;background:var(--linha)}
+.atalhos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.atalho{background:var(--card);border:1px solid var(--linha);border-radius:14px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:6px;min-height:92px}
+.atalho .tag{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ouro);font-weight:700}
+.atalho b{font-size:15px;color:var(--tinta);line-height:1.2}
+.atalho span{font-size:12px;opacity:.75}
+.atalho.destaque{background:var(--vinho);border-color:var(--vinho);color:#f3e2c3}
+.atalho.destaque b{color:#fff}
+
+/* ---------- Lista de livros ---------- */
+.busca{position:sticky;top:calc(66px + var(--top));z-index:10;background:var(--creme);padding:12px 18px 10px}
+.busca input{width:100%;padding:12px 14px 12px 40px;border-radius:12px;border:1px solid var(--linha);background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b8893a' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") 12px center/18px no-repeat;font:inherit;color:var(--tinta);outline:none}
+.busca input:focus{border-color:var(--ouro)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:7px 13px;border-radius:20px;border:1px solid var(--linha);font-size:12.5px;font-weight:600;background:var(--card)}
+.chip.on{background:var(--vinho);color:#f6e7c8;border-color:var(--vinho)}
+.grupo h3{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--ouro);margin:20px 0 8px;font-weight:700}
+.livro{display:flex;align-items:center;gap:12px;padding:13px 4px;border-bottom:1px solid var(--linha);width:100%;text-align:left}
+.livro .n{width:40px;height:40px;border-radius:10px;background:var(--card);border:1px solid var(--linha);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--vinho);flex:none}
+body.noite .livro .n{color:var(--ouro2)}
+.livro .t{flex:1;min-width:0}
+.livro b{display:block;font-size:15px;color:var(--tinta);font-weight:600}
+.livro span{display:block;font-size:12.5px;opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.livro .selo{font-size:10px;font-weight:700;letter-spacing:.5px;padding:3px 7px;border-radius:6px;background:rgba(184,137,58,.15);color:var(--ouro);flex:none;text-transform:uppercase}
+.livro.off{opacity:.5}
+.livro .fav{color:var(--ouro);font-size:16px}
+
+/* ---------- Livro (capítulos) ---------- */
+.livro-top{padding:20px 18px 6px}
+.livro-top small{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--ouro);font-weight:700}
+.livro-top h2{font-size:28px;font-weight:800;color:var(--tinta);line-height:1.1;margin:4px 0 8px;letter-spacing:-.5px}
+.livro-top p{font-size:14px;opacity:.85}
+.livro-top .meta{display:flex;gap:14px;margin-top:10px;font-size:12.5px;font-weight:600;color:var(--ouro)}
+.caps{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:8px;padding:16px 18px}
+.cap{display:flex;align-items:center;justify-content:center;text-decoration:none;aspect-ratio:1;border-radius:12px;background:var(--card);border:1px solid var(--linha);font-weight:700;font-size:15px;color:var(--tinta);position:relative}
+.cap.lido{background:rgba(184,137,58,.18)}
+.cap.lido::after{content:"";position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;background:var(--ouro)}
+.cap:active{transform:scale(.95)}
+.aviso{margin:16px 18px;padding:14px;border-radius:12px;border:1px dashed var(--ouro);font-size:13.5px}
+
+/* ---------- Leitor ---------- */
+#leitor{padding-bottom:0}
+#leitor.ativa{display:flex;flex-direction:column;height:100%}
+.frame-box{flex:1;position:relative;background:var(--papel)}
+.frame-box iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
+.carregando{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:30px;font-size:14px}
+.spin{width:34px;height:34px;border-radius:50%;border:3px solid var(--linha);border-top-color:var(--ouro);animation:g 0.8s linear infinite}
+@keyframes g{to{transform:rotate(360deg)}}
+.nav-cap{display:flex;gap:8px;padding:10px 12px calc(10px + var(--bot));background:var(--vinho)}
+.nav-cap button,.nav-cap a{flex:1;padding:12px 8px;border-radius:10px;background:rgba(255,255,255,.08);color:#f6e7c8;font-weight:600;font-size:13.5px;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px}
+.nav-cap .meio{flex:1.3;background:var(--ouro);color:#2a1410}
+.nav-cap button:disabled{opacity:.35}
+
+/* ---------- Bônus / Ajustes ---------- */
+.card{text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--linha);border-radius:16px;padding:16px;margin-bottom:12px;display:flex;gap:14px;align-items:center;width:100%;text-align:left}
+.card .capa{width:58px;height:76px;border-radius:4px 7px 7px 4px;flex:none;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:800;font-size:9px;line-height:1.1;padding:4px;box-shadow:inset 3px 0 5px rgba(0,0,0,.3),0 6px 12px -6px rgba(0,0,0,.5)}
+.card b{display:block;font-size:15.5px;color:var(--tinta)}
+.card span{font-size:12.5px;opacity:.8}
+.card .em{display:inline-block;margin-top:6px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--ouro)}
+.opcao{display:flex;align-items:center;justify-content:space-between;padding:16px 4px;border-bottom:1px solid var(--linha);width:100%;text-align:left;font-weight:600;color:var(--tinta)}
+.switch{width:46px;height:28px;border-radius:20px;background:var(--linha);position:relative;transition:.2s;flex:none}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.switch.on{background:var(--ouro)}
+.switch.on::after{left:21px}
+.sobre{font-size:13px;opacity:.8;margin-top:18px;line-height:1.6}
+
+/* ---------- Barra inferior ---------- */
+.tab{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--card);border-top:1px solid var(--linha);display:flex;padding:6px 6px calc(6px + var(--bot));box-shadow:0 -6px 20px -12px rgba(0,0,0,.3)}
+.tab button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font-size:10.5px;font-weight:600;color:var(--texto);opacity:.6}
+.tab button.on{opacity:1;color:var(--vinho)}
+body.noite .tab button.on{color:var(--ouro2)}
+.tab svg{width:23px;height:23px}
+body.lendo .tab{display:none}
+
+/* ---------- Instalar ---------- */
+.instalar{position:fixed;left:12px;right:12px;bottom:calc(76px + var(--bot));z-index:40;background:var(--vinho);color:#f6e7c8;border-radius:16px;padding:14px 16px;display:none;gap:12px;align-items:center;box-shadow:0 14px 30px -10px rgba(0,0,0,.5)}
+.instalar.on{display:flex}
+.instalar img{width:44px;height:44px;border-radius:10px}
+.instalar div{flex:1;font-size:13px;line-height:1.35}
+.instalar b{display:block;color:#fff;font-size:14px}
+.instalar .x{font-size:20px;opacity:.7;padding:4px 8px}
+.instalar .ok{background:var(--ouro);color:#2a1410;font-weight:700;padding:9px 14px;border-radius:10px;font-size:13px}
+.vazio{text-align:center;padding:40px 20px;opacity:.7;font-size:14px}
+</style>
+</head>
+<body>
+
+<!-- ============ INÍCIO ============ -->
+<section class="tela ativa" id="inicio">
+  <div class="hero">
+    <small>Cânone completo etíope</small>
+    <h2>Bíblia Etíope<br>em Português</h2>
+    <p>Bem-vindo(a). Escolha um livro e comece a sua leitura.</p>
+  </div>
+  <a class="continuar" id="btnContinuar" target="_blank" rel="noopener" style="text-decoration:none">
+    <div class="b"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+    <div><small id="contLabel">Comece por aqui</small><b id="contTexto">Gênesis 1</b></div>
+  </a>
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat"><b id="stLivros">–</b><span>livros</span></div>
+      <div class="stat"><b id="stCaps">–</b><span>capítulos</span></div>
+      <div class="stat"><b id="stLidos">0</b><span>lidos por você</span></div>
+    </div>
+
+    <div class="titulo-sec">Exclusivos do cânone etíope</div>
+    <div class="atalhos">
+      <button class="atalho destaque" data-livro="henok"><span class="tag">Destaque</span><b>Livro de Enoque</b><span>108 capítulos</span></button>
+      <button class="atalho destaque" data-livro="jubileus"><span class="tag">Destaque</span><b>Jubileus (Kufale)</b><span>51 capítulos</span></button>
+      <button class="atalho" data-livro="ezra-sutuel"><span class="tag">Profético</span><b>Ezra Sutu'el</b><span>Sete visões de Esdras</span></button>
+      <button class="atalho" data-livro="salmo-151"><span class="tag">Salmo</span><b>Salmo 151</b><span>O jovem Davi</span></button>
+    </div>
+
+    <div class="titulo-sec">Para começar</div>
+    <div class="atalhos">
+      <button class="atalho" data-livro="genesis"><span class="tag">Lei</span><b>Gênesis</b><span>A criação e os patriarcas</span></button>
+      <button class="atalho" data-livro="salmos"><span class="tag">Sapiencial</span><b>Salmos</b><span>150 orações e cânticos</span></button>
+      <button class="atalho" data-livro="mateus"><span class="tag">Evangelho</span><b>Mateus</b><span>O Evangelho do Reino</span></button>
+      <button class="atalho" data-livro="apocalipse"><span class="tag">Profecia</span><b>Apocalipse</b><span>A nova Jerusalém</span></button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LIVROS ============ -->
+<section class="tela" id="livros">
+  <div class="head"><h1>Livros</h1></div>
+  <div class="busca">
+    <input id="q" type="search" placeholder="Buscar livro…" autocomplete="off">
+    <div class="chips" id="chips"></div>
+  </div>
+  <div class="wrap" id="lista"></div>
+</section>
+
+<!-- ============ CAPÍTULOS ============ -->
+<section class="tela" id="livro">
+  <div class="head">
+    <button class="ic" data-voltar><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m15 18-6-6 6-6"/></svg></button>
+    <h1 id="lvTitulo">Livro</h1>
+    <button class="ic" id="btnFav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 17.3 6.2 21l1.6-6.6L2.6 10l6.8-.6L12 3l2.6 6.4 6.8.6-5.2 4.4 1.6 6.6z"/></svg></button>
+  </div>
+  <div class="livro-top">
+    <small id="lvGrupo"></small>
+    <h2 id="lvNome"></h2>
+    <p id="lvDesc"></p>
+    <div class="meta" id="lvMeta"></div>
+  </div>
+  <div id="lvCaps"></div>
+</section>
+
+<!-- ============ LEITOR ============ -->
+<section class="tela" id="leitor">
+  <div class="head">
+    <button class="ic" data-voltar><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m15 18-6-6 6-6"/></svg></button>
+    <h1 id="ltTitulo">Capítulo</h1>
+    <a class="ic" id="ltExterno" target="_blank" rel="noopener" title="Abrir no navegador"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>
+  </div>
+  <div class="frame-box">
+    <div class="carregando" id="ltLoad"><div class="spin"></div><span>Abrindo capítulo…</span></div>
+    <iframe id="ltFrame" title="Texto do capítulo" referrerpolicy="no-referrer-when-downgrade"></iframe>
+  </div>
+  <div class="nav-cap">
+    <button id="ltAnt">‹ Anterior</button>
+    <button class="meio" id="ltCaps">Capítulos</button>
+    <button id="ltProx">Próximo ›</button>
+  </div>
+</section>
+
+<!-- ============ BÔNUS ============ -->
+<section class="tela" id="bonus">
+  <div class="head"><h1>Seus bônus</h1></div>
+  <div class="wrap" style="padding-top:18px">
+    <button class="card" data-livro="henok">
+      <div class="capa" style="background:linear-gradient(100deg,#8a6234,#b8925c 12%,#a47c48);color:#3b2410">LIVRO<br>DE<br>ENOQUE</div>
+      <div><b>Livro de Enoque</b><span>Leitura separada, capítulo por capítulo.</span></div>
+    </button>
+    <button class="card" data-livro="jubileus">
+      <div class="capa" style="background:linear-gradient(100deg,#b99866,#dcc49a 15%,#cdb184);color:#4a3218">JUBI-<br>LEUS</div>
+      <div><b>Livro dos Jubileus</b><span>A história do Gênesis contada a Moisés no Sinai.</span></div>
+    </button>
+    <!-- Ajuste os links dos bônus abaixo quando os arquivos estiverem prontos -->
+    <a class="card" id="bnKebra" href="#" target="_blank" rel="noopener">
+      <div class="capa" style="background:linear-gradient(100deg,#13291c,#1f3d2a 12%,#18331f);color:#d9b56a">KEBRA<br>NAGAST</div>
+      <div><b>Kebra Nagast</b><span>A história da Arca da Aliança levada para a Etiópia.</span><span class="em" id="bnKebraEm">Em breve</span></div>
+    </a>
+    <a class="card" id="bnGuia" href="#" target="_blank" rel="noopener">
+      <div class="capa" style="background:linear-gradient(100deg,#d8c7a4,#efe3c9 12%,#e6d6b5);color:#7a5a2c">GUIA DE<br>LEITURA</div>
+      <div><b>Guia de Leitura Fácil</b><span>Por onde começar e como ler os 88 livros.</span><span class="em" id="bnGuiaEm">Em breve</span></div>
+    </a>
+  </div>
+</section>
+
+<!-- ============ AJUSTES ============ -->
+<section class="tela" id="ajustes">
+  <div class="head"><h1>Ajustes</h1></div>
+  <div class="wrap" style="padding-top:8px">
+    <button class="opcao" id="optNoite">Modo noturno <span class="switch" id="swNoite"></span></button>
+    <button class="opcao" id="optFavs">Meus favoritos <span>›</span></button>
+    <button class="opcao" id="optInstalar">Instalar o app no celular <span>›</span></button>
+    <button class="opcao" id="optZerar">Zerar meu progresso de leitura <span>›</span></button>
+    <p class="sobre">Bíblia Etíope em Português · acesso exclusivo para clientes.<br>Os textos são carregados de <b>bibliaetiope.com.br</b>.</p>
+  </div>
+</section>
+
+<!-- ============ BARRA INFERIOR ============ -->
+<nav class="tab">
+  <button class="on" data-tab="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Início</button>
+  <button data-tab="livros"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5V5a2 2 0 0 1 2-2h14v16H6.5A2.5 2.5 0 0 0 4 21.5a2.5 2.5 0 0 0 2.5-2.5H20"/></svg>Livros</button>
+  <button data-tab="bonus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7z"/></svg>Bônus</button>
+  <button data-tab="ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Ajustes</button>
+</nav>
+
+<div class="instalar" id="instalar">
+  <img src="img/icon-192.png" alt="">
+  <div><b>Instale o app</b><span id="instTxt">Tenha a Bíblia Etíope na tela inicial do celular.</span></div>
+  <button class="ok" id="instOk">Instalar</button>
+  <button class="x" id="instX">×</button>
+</div>
+
+<script>
+/* ===== CONFIGURAÇÃO ===== */
+const SITE = "https://bibliaetiope.com.br/pt";
+const LINK_KEBRA = "";   // cole aqui o link do PDF do Kebra Nagast
+const LINK_GUIA  = "";   // cole aqui o link do PDF do Guia de Leitura
+
+/* ===== ACERVO (slug, nome, descrição, capítulos, status) ===== */
+const ACERVO = [
+ {g:"Lei (Orit)",t:"AT",l:[
+  ["genesis","Gênesis","A criação, o dilúvio, Babel e os patriarcas até José no Egito",50],
+  ["exodo","Êxodo","A escravidão no Egito, as pragas, o mar e a Lei no Sinai",40],
+  ["levitico","Levítico","Sacrifícios, pureza, festas e o Dia da Expiação",27],
+  ["numeros","Números","Os quarenta anos no deserto, da murmuração à promessa",36],
+  ["deuteronomio","Deuteronômio","Os discursos de despedida de Moisés junto ao Jordão",34],
+  ["josue","Josué","A conquista de Canaã e a partilha da terra",24],
+  ["juizes","Juízes","Débora, Gedeão, Jefté e Sansão",21],
+  ["rute","Rute","A moabita fiel que entra na linhagem de Davi",4]]},
+ {g:"Históricos",t:"AT",l:[
+  ["1-samuel","1 Samuel","Samuel, a queda de Saul e a ascensão de Davi",31],
+  ["2-samuel","2 Samuel","O reinado de Davi, a aliança e a revolta de Absalão",24],
+  ["1-reis","1 Reis","Salomão, o Templo, a divisão do reino e Elias",22],
+  ["2-reis","2 Reis","De Eliseu ao exílio na Babilônia",25],
+  ["1-cronicas","1 Crônicas","Genealogias e o reinado de Davi",29],
+  ["2-cronicas","2 Crônicas","De Salomão ao decreto de Ciro",36],
+  ["esdras","Esdras","O retorno do exílio e a reconstrução do Templo",10],
+  ["neemias","Neemias","A reconstrução dos muros de Jerusalém",13],
+  ["ezra-kali","Ezra Kali (1 Esdras)","O relato grego do retorno e o debate dos três guardas",9],
+  ["ezra-sutuel","Ezra Sutu'el (2 Esdras)","Sete visões apocalípticas após a queda de Jerusalém",16],
+  ["tobias","Tobias","A viagem de Tobias guiado pelo anjo Rafael",14],
+  ["judite","Judite","A viúva de Betúlia que vence Holofernes",16],
+  ["ester","Ester","A rainha judia na corte persa, no texto grego completo",10],
+  ["josipon","Josipon (Zena Ayhud)","História dos judeus a partir de Josefo",0,"Sem fonte"]]},
+ {g:"Exclusivos do cânone etíope",t:"AT",l:[
+  ["jubileus","Jubileus (Kufale)","Gênesis e Êxodo narrados a Moisés no Sinai",51,"",0],
+  ["henok","Enoque (Henok)","Os Vigilantes, os gigantes, as viagens de Enoque e o Filho do Homem",108],
+  ["1-meqabyan","1 Meqabyan","Primeiro livro etíope dos Macabeus",0,"Em preparo"],
+  ["2-meqabyan","2 Meqabyan","A soberania de Deus na história",0,"Em preparo"],
+  ["3-meqabyan","3 Meqabyan","Juízo, ressurreição e a brevidade da vida",0,"Em preparo"]]},
+ {g:"Sapienciais",t:"AT",l:[
+  ["jo","Jó","O justo provado e o mistério do sofrimento",42],
+  ["salmos","Salmos","Os 150 salmos de lamento e louvor",150],
+  ["salmo-151","Salmo 151","O jovem Davi entre as ovelhas",1],
+  ["messale","Provérbios (Messale)","Os provérbios de Salomão, capítulos 1 a 24",24],
+  ["tegsats","Tegsats (Provérbios 25–31)","A coleção de Ezequias e o elogio da mulher virtuosa",7,"",25],
+  ["eclesiastes","Eclesiastes","A vaidade de tudo debaixo do sol",12],
+  ["cantico-dos-canticos","Cântico dos Cânticos","O poema de amor entre Deus e seu povo",8],
+  ["sabedoria-de-salomao","Sabedoria de Salomão","A imortalidade dos justos e a Sabedoria",19],
+  ["eclesiastico","Eclesiástico (Sirácida)","Os conselhos de Jesus ben Sirá",51]]},
+ {g:"Profetas",t:"AT",l:[
+  ["isaias","Isaías","Emanuel, o Servo Sofredor e o consolo de Sião",66],
+  ["jeremias","Jeremias","A queda de Jerusalém e a nova aliança",52],
+  ["lamentacoes","Lamentações","Cinco poemas sobre a cidade arruinada",5],
+  ["baruc","Baruc","A confissão dos exilados e a Carta de Jeremias",6],
+  ["4-baruc","4 Baruc","Os paralipômenos de Jeremias",0,"Em preparo"],
+  ["ezequiel","Ezequiel","O carro de fogo, os ossos secos e o novo Templo",48],
+  ["daniel","Daniel","Daniel no texto grego completo, com Susana e Bel",14],
+  ["oseias","Oseias","O amor fiel de Deus diante da infidelidade",14],
+  ["joel","Joel","O Dia do Senhor e o Espírito derramado",3],
+  ["amos","Amós","Contra a injustiça e o culto vazio",9],
+  ["obadias","Obadias","O oráculo contra Edom",1],
+  ["jonas","Jonas","O profeta que fugiu de Nínive",4],
+  ["miqueias","Miqueias","O governante que virá de Belém",7],
+  ["naum","Naum","A queda de Nínive",3],
+  ["habacuque","Habacuque","O diálogo do profeta com Deus",3],
+  ["sofonias","Sofonias","O resto humilde que confia no Senhor",3],
+  ["ageu","Ageu","O chamado para reconstruir o Templo",2],
+  ["zacarias","Zacarias","Oito visões e o rei montado num jumento",14],
+  ["malaquias","Malaquias","O mensageiro da aliança",4],
+  ["oracao-de-manasses","Oração de Manassés","A oração de arrependimento do rei Manassés",1]]},
+ {g:"Evangelhos",t:"NT",l:[
+  ["mateus","Mateus","Do Sermão da Montanha à Grande Comissão",28],
+  ["marcos","Marcos","Do batismo ao túmulo vazio",16],
+  ["lucas","Lucas","O Bom Samaritano e o Filho Pródigo",24],
+  ["joao","João","O Verbo que se fez carne",21]]},
+ {g:"Atos",t:"NT",l:[
+  ["atos-dos-apostolos","Atos dos Apóstolos","Pentecostes e as viagens de Paulo",28]]},
+ {g:"Cartas",t:"NT",l:[
+  ["romanos","Romanos","Pecado, graça e justificação pela fé",16],
+  ["1-corintios","1 Coríntios","Os dons e o capítulo do amor",16],
+  ["2-corintios","2 Coríntios","O poder que se aperfeiçoa na fraqueza",13],
+  ["galatas","Gálatas","A liberdade cristã",6],
+  ["efesios","Efésios","A Igreja como corpo e a armadura de Deus",6],
+  ["filipenses","Filipenses","A carta da alegria",4],
+  ["colossenses","Colossenses","A supremacia de Cristo",4],
+  ["1-tessalonicenses","1 Tessalonicenses","A esperança na vinda do Senhor",5],
+  ["2-tessalonicenses","2 Tessalonicenses","O Dia do Senhor e o trabalho",3],
+  ["1-timoteo","1 Timóteo","Ordem na Igreja e sã doutrina",6],
+  ["2-timoteo","2 Timóteo","Combati o bom combate",4],
+  ["tito","Tito","A graça que ensina a viver",3],
+  ["filemom","Filemom","Onésimo, recebido como irmão",1],
+  ["hebreus","Hebreus","Cristo, o sumo sacerdote, e a galeria da fé",13],
+  ["tiago","Tiago","A fé que se prova nas obras",5],
+  ["1-pedro","1 Pedro","Peregrinos que sofrem fazendo o bem",5],
+  ["2-pedro","2 Pedro","Contra os falsos mestres",3],
+  ["1-joao","1 João","Deus é luz e amor",5],
+  ["2-joao","2 João","Andar na verdade",1],
+  ["3-joao","3 João","A hospitalidade",1],
+  ["judas","Judas","A carta que cita Enoque",1]]},
+ {g:"Apocalipse",t:"NT",l:[
+  ["apocalipse","Apocalipse","As sete igrejas e a nova Jerusalém",22]]},
+ {g:"Ordens da Igreja",t:"NT",l:[
+  ["sinodos","Sinodos","Quatro seções de ordem eclesiástica",0,"Em preparo"],
+  ["1-kidan","1 Kidan","O primeiro livro da Aliança",0,"Em preparo"],
+  ["2-kidan","2 Kidan","O segundo livro da Aliança",0,"Em preparo"],
+  ["clemente","Clemente (Qälëmentos)","Os sete livros atribuídos a Clemente de Roma",0,"Em preparo"],
+  ["didascalia","Didascalia","Manual de disciplina e culto",0,"Em preparo"]]}
+];
+
+/* Índice plano */
+const LIVROS=[];const MAPA={};
+ACERVO.forEach(sec=>sec.l.forEach(x=>{
+  const b={slug:x[0],nome:x[1],desc:x[2],caps:x[3],status:x[4]||"",ini:x[5]??1,grupo:sec.g,test:sec.t};
+  // Jubileus começa no capítulo 0 no site; Tegsats começa no 25
+  if(b.slug==="jubileus") b.ini=0;
+  LIVROS.push(b);MAPA[b.slug]=b;
+}));
+const lista=(c,i)=>Array.from({length:c},(_,k)=>k+i);
+
+/* ===== Armazenamento ===== */
+const S={get(k,d){try{return JSON.parse(localStorage.getItem('be_'+k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem('be_'+k,JSON.stringify(v))}catch(e){}}};
+let lidos=S.get('lidos',{}),favs=S.get('favs',[]),ultimo=S.get('ultimo',null);
+
+/* ===== Navegação entre telas ===== */
+const $=id=>document.getElementById(id);
+const pilha=['inicio'];
+function ir(tela,empilhar=true){
+  document.querySelectorAll('.tela').forEach(t=>t.classList.toggle('ativa',t.id===tela));
+  document.body.classList.toggle('lendo',tela==='leitor');
+  if(empilhar&&pilha[pilha.length-1]!==tela)pilha.push(tela);
+  const base=['inicio','livros','bonus','ajustes'];
+  if(base.includes(tela)){pilha.length=0;pilha.push(tela);document.querySelectorAll('.tab button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tela))}
+  scrollTo(0,0);
+  history.replaceState(null,'',tela==='inicio'?location.pathname:'#'+tela);
+}
+function voltar(){pilha.pop();ir(pilha[pilha.length-1]||'inicio',false);if(pilha[pilha.length-1]==='livro')abrirLivro(atual.slug,false)}
+document.querySelectorAll('[data-voltar]').forEach(b=>b.onclick=voltar);
+document.querySelectorAll('.tab button').forEach(b=>b.onclick=()=>{ir(b.dataset.tab);if(b.dataset.tab==='inicio')pintarInicio()});
+document.addEventListener('click',e=>{const a=e.target.closest('[data-livro]');if(a)abrirLivro(a.dataset.livro)});
+
+/* ===== Início ===== */
+function pintarInicio(){
+  const ativos=LIVROS.filter(b=>b.caps>0);
+  $('stLivros').textContent=LIVROS.length;
+  $('stCaps').textContent=ativos.reduce((s,b)=>s+b.caps,0).toLocaleString('pt-BR');
+  $('stLidos').textContent=Object.values(lidos).reduce((s,a)=>s+a.length,0);
+  if(ultimo&&MAPA[ultimo.s]){$('contLabel').textContent='Continuar leitura';$('contTexto').textContent=MAPA[ultimo.s].nome+' '+ultimo.c}contLink();
+}
+function contLink(){const u=ultimo&&MAPA[ultimo.s]?ultimo:{s:'genesis',c:1};$('btnContinuar').href=`${SITE}/${u.s}/${u.c}`;$('btnContinuar').dataset.s=u.s;$('btnContinuar').dataset.c=u.c}
+$('btnContinuar').onclick=()=>{const b=$('btnContinuar');const s=b.dataset.s,c=+b.dataset.c;const prox=c+1<MAPA[s].ini+MAPA[s].caps?c+1:c;marcar(s,c);ultimo={s,c:prox};S.set('ultimo',ultimo);setTimeout(pintarInicio,300)};
+function marcar(slug,c){(lidos[slug]=lidos[slug]||[]).includes(c)||lidos[slug].push(c);S.set('lidos',lidos);if(!(ultimo&&ultimo.s===slug&&ultimo.c>c)){ultimo={s:slug,c};S.set('ultimo',ultimo)}}
+
+/* ===== Lista de livros ===== */
+let filtro='Todos';
+const grupos=['Todos','Favoritos','Antigo Testamento','Novo Testamento','Exclusivos do cânone etíope'];
+$('chips').innerHTML=grupos.map(g=>`<button class="chip${g===filtro?' on':''}" data-g="${g}">${g}</button>`).join('');
+$('chips').onclick=e=>{const c=e.target.closest('.chip');if(!c)return;filtro=c.dataset.g;$('chips').querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===c));pintarLista()};
+$('q').oninput=pintarLista;
+const sem=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+function pintarLista(){
+  const q=sem($('q').value.trim());
+  let html='';
+  ACERVO.forEach(sec=>{
+    const itens=sec.l.map(x=>MAPA[x[0]]).filter(b=>{
+      if(q&&!sem(b.nome+' '+b.desc).includes(q))return false;
+      if(filtro==='Favoritos')return favs.includes(b.slug);
+      if(filtro==='Antigo Testamento')return b.test==='AT';
+      if(filtro==='Novo Testamento')return b.test==='NT';
+      if(filtro==='Exclusivos do cânone etíope')return sec.g===filtro;
+      return true;
+    });
+    if(!itens.length)return;
+    html+=`<div class="grupo"><h3>${sec.g}</h3>`+itens.map(b=>`
+      <button class="livro${b.caps?'':' off'}" data-livro="${b.slug}">
+        <div class="n">${b.caps||'–'}</div>
+        <div class="t"><b>${b.nome}</b><span>${b.desc}</span></div>
+        ${b.status?`<span class="selo">${b.status}</span>`:''}${favs.includes(b.slug)?'<span class="fav">★</span>':''}
+      </button>`).join('')+'</div>';
+  });
+  $('lista').innerHTML=html||'<div class="vazio">Nenhum livro encontrado.</div>';
+}
+
+/* ===== Livro ===== */
+let atual=null;
+function abrirLivro(slug,empilhar=true){
+  const b=MAPA[slug];if(!b)return;atual=b;
+  $('lvTitulo').textContent=b.nome;$('lvNome').textContent=b.nome;$('lvGrupo').textContent=b.grupo;$('lvDesc').textContent=b.desc;
+  $('lvMeta').innerHTML=b.caps?`<span>${b.caps} capítulos</span><span>${(lidos[slug]||[]).length} lidos</span>`:'';
+  $('btnFav').style.color=favs.includes(slug)?'#d9b56a':'';
+  $('btnFav').querySelector('path').setAttribute('fill',favs.includes(slug)?'currentColor':'none');
+  if(!b.caps){
+    $('lvCaps').innerHTML=`<div class="aviso">${b.status==='Sem fonte'?'Este livro ainda não tem uma tradução disponível em português.':'A tradução deste livro está em preparo e será liberada aqui no app assim que ficar pronta.'}</div>`;
+  }else{
+    const l=lidos[slug]||[];
+    $('lvCaps').innerHTML='<div class="caps">'+lista(b.caps,b.ini).map(c=>`<a class="cap${l.includes(c)?' lido':''}" data-c="${c}" href="${SITE}/${b.slug}/${c}" target="_blank" rel="noopener">${c}</a>`).join('')+'</div>';
+  }
+  ir('livro',empilhar);
+}
+$('lvCaps').onclick=e=>{const c=e.target.closest('.cap');if(c){marcar(atual.slug,+c.dataset.c);c.classList.add('lido')}};
+$('btnFav').onclick=()=>{const s=atual.slug;favs=favs.includes(s)?favs.filter(x=>x!==s):[...favs,s];S.set('favs',favs);abrirLivro(s,false);pintarLista()};
+
+/* ===== Leitor ===== */
+let capAtual=1;
+function ler(c){
+  const b=atual;capAtual=c;
+  const url=`${SITE}/${b.slug}/${c}`;
+  $('ltTitulo').textContent=`${b.nome} ${c}`;
+  $('ltExterno').href=url;
+  $('ltLoad').style.display='flex';
+  $('ltFrame').src=url;
+  $('ltAnt').disabled=c<=b.ini;$('ltProx').disabled=c>=b.ini+b.caps-1;
+  (lidos[b.slug]=lidos[b.slug]||[]).includes(c)||lidos[b.slug].push(c);S.set('lidos',lidos);
+  ultimo={s:b.slug,c};S.set('ultimo',ultimo);
+  if(!$('leitor').classList.contains('ativa'))ir('leitor');
+}
+$('ltFrame').onload=()=>{$('ltLoad').style.display='none'};
+$('ltAnt').onclick=()=>ler(capAtual-1);
+$('ltProx').onclick=()=>ler(capAtual+1);
+$('ltCaps').onclick=voltar;
+
+/* ===== Bônus ===== */
+if(LINK_KEBRA){$('bnKebra').href=LINK_KEBRA;$('bnKebraEm').textContent='Abrir'}else $('bnKebra').onclick=e=>e.preventDefault();
+if(LINK_GUIA){$('bnGuia').href=LINK_GUIA;$('bnGuiaEm').textContent='Abrir'}else $('bnGuia').onclick=e=>e.preventDefault();
+
+/* ===== Ajustes ===== */
+function noite(v){document.body.classList.toggle('noite',v);$('swNoite').classList.toggle('on',v);S.set('noite',v)}
+noite(S.get('noite',false));
+$('optNoite').onclick=()=>noite(!document.body.classList.contains('noite'));
+$('optFavs').onclick=()=>{filtro='Favoritos';ir('livros');$('chips').querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x.dataset.g==='Favoritos'));pintarLista()};
+$('optZerar').onclick=()=>{if(!$('optZerar').dataset.c){$('optZerar').dataset.c=1;$('optZerar').firstChild.textContent='Toque de novo para confirmar ';return}lidos={};ultimo=null;S.set('lidos',lidos);S.set('ultimo',null);$('optZerar').dataset.c='';$('optZerar').firstChild.textContent='Progresso zerado ✓ ';pintarInicio()};
+
+/* ===== Instalar (PWA) ===== */
+let promptInst=null;
+const ios=/iphone|ipad|ipod/i.test(navigator.userAgent),instalado=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();promptInst=e;if(!S.get('instX',false))$('instalar').classList.add('on')});
+function mostrarInstalar(){
+  if(promptInst){promptInst.prompt();return}
+  $('instTxt').textContent=ios?'No Safari, toque em Compartilhar e depois em "Adicionar à Tela de Início".':'No menu do navegador (⋮), toque em "Instalar app" ou "Adicionar à tela inicial".';
+  $('instOk').style.display='none';$('instalar').classList.add('on');
+}
+$('instOk').onclick=mostrarInstalar;
+$('optInstalar').onclick=mostrarInstalar;
+$('instX').onclick=()=>{$('instalar').classList.remove('on');S.set('instX',true)};
+if(ios&&!instalado&&!S.get('instX',false))setTimeout(mostrarInstalar,2500);
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+pintarInicio();pintarLista();
+</script>
+</body>
+</html>
